@@ -1,2 +1,3 @@
-# cpm_resources
-CPM Resources website written in Django
+# Local Library
+
+Library website written in Django
