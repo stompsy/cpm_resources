@@ -1,12 +1,9 @@
 from django.db import models
+from django.db.models import UniqueConstraint
+from django.db.models.functions import Lower
+from django.urls import reverse
 
-from django.urls import (
-    reverse,
-)  # Used in get_absolute_url() to get URL for specified ID
-
-from django.db.models import UniqueConstraint  # Constrains fields to unique values
-from django.db.models.functions import Lower  # Returns lower cased value of field
-import uuid  # Required for unique book instances
+import uuid
 
 
 class Genre(models.Model):
@@ -19,11 +16,9 @@ class Genre(models.Model):
     )
 
     def __str__(self):
-        """String for representing the Model object."""
         return self.name
 
     def get_absolute_url(self):
-        """Returns the url to access a particular genre instance."""
         return reverse("genre-detail", args=[str(self.id)])
 
     class Meta:
@@ -32,6 +27,31 @@ class Genre(models.Model):
                 Lower("name"),
                 name="genre_name_case_insensitive_unique",
                 violation_error_message="Genre already exists (case insensitive match)",
+            ),
+        ]
+
+
+class Language(models.Model):
+    """Model representing a Language (e.g. English, French, Japanese, etc.)"""
+
+    name = models.CharField(
+        max_length=200,
+        unique=True,
+        help_text="Enter the book's natural language (e.g. English, French, Japanese etc.)",
+    )
+
+    def get_absolute_url(self):
+        return reverse("language-detail", args=[str(self.id)])
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                Lower("name"),
+                name="language_name_case_insensitive_unique",
+                violation_error_message="Language already exists (case insensitive match)",
             ),
         ]
 
@@ -45,8 +65,10 @@ class Book(models.Model):
     # Author as a string rather than object because it hasn't been declared yet in file.
 
     summary = models.TextField(
-        max_length=1000, help_text="Enter a brief description of the book"
+        max_length=1000,
+        help_text="Enter a brief description of the book",
     )
+
     isbn = models.CharField(
         "ISBN",
         max_length=13,
@@ -55,17 +77,17 @@ class Book(models.Model):
         '">ISBN number</a>',
     )
 
+    genre = models.ManyToManyField(Genre, help_text="Select a genre for this book")
     # ManyToManyField used because genre can contain many books. Books can cover many genres.
     # Genre class has already been defined so we can specify the object above.
-    genre = models.ManyToManyField(Genre, help_text="Select a genre for this book")
 
-    def __str__(self):
-        """String for representing the Model object."""
-        return self.title
+    language = models.ForeignKey("Language", on_delete=models.SET_NULL, null=True)
 
     def get_absolute_url(self):
-        """Returns the URL to access a detail record for this book."""
         return reverse("book-detail", args=[str(self.id)])
+
+    def __str__(self):
+        return self.title
 
 
 class BookInstance(models.Model):
@@ -115,9 +137,7 @@ class Author(models.Model):
         ordering = ["last_name", "first_name"]
 
     def get_absolute_url(self):
-        """Returns the URL to access a particular author instance."""
         return reverse("author-detail", args=[str(self.id)])
 
     def __str__(self):
-        """String for representing the Model object."""
         return f"{self.last_name}, {self.first_name}"
