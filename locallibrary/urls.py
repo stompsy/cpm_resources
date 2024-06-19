@@ -1,5 +1,5 @@
 """
-URL configuration for cpmresources project.
+URL configuration for locallibrary project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/4.2/topics/http/urls/
@@ -24,6 +24,6 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("agency/", include("agency.urls")),
-    path("", RedirectView.as_view(url="agency/")),
+    path("catalog/", include("catalog.urls")),
+    path("", RedirectView.as_view(url="catalog/")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
